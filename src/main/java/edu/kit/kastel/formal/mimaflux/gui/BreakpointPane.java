@@ -38,10 +38,9 @@ import javax.swing.text.Caret;
 import javax.swing.text.Highlighter;
 import javax.swing.text.Highlighter.HighlightPainter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -58,6 +57,7 @@ import java.util.Observer;
  * It is connected to a {@link BreakpointManager}.
  */
 public class BreakpointPane extends BracketMatchingTextArea implements Observer {
+    @Serial
     private static final long serialVersionUID = -5566042549810690095L;
 
     private static final Font FONT = new Font(Font.MONOSPACED, Font.BOLD, 16);
@@ -68,10 +68,10 @@ public class BreakpointPane extends BracketMatchingTextArea implements Observer 
     private static final HighlightPainter BAR_PAINTER = 
             new BarHighlightPainter(HIGHLIGHT_COLOR);
 
-    private BreakpointManager breakpointManager;
+    private final BreakpointManager breakpointManager;
     private Object breakPointResource;
-    private List<Object> lineHighlights = new ArrayList<Object>();
-    private Logger logger;
+    private final List<Object> lineHighlights = new ArrayList<>();
+    private final Logger logger;
     
     public BreakpointPane(BreakpointManager breakpointManager,
             boolean showLineNumbers, Logger logger) {
@@ -130,7 +130,7 @@ public class BreakpointPane extends BracketMatchingTextArea implements Observer 
         if(breakPointResource == null)
             return;
         
-        int offset = viewToModel(e.getPoint());
+        int offset = viewToModel2D(e.getPoint());
         final int line;
         try {
             line = getLineOfOffset(offset);
@@ -139,31 +139,32 @@ public class BreakpointPane extends BracketMatchingTextArea implements Observer 
         }
         
         boolean hasBreakPointHere = breakpointManager.hasBreakpoint(breakPointResource, line);
-        
-        JMenuItem item;
-        if (hasBreakPointHere) {
-            item = new JMenuItem("Remove this breakpoint");
-            item.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    breakpointManager.removeBreakpoint(breakPointResource, line);
-                    repaint();
-                }
-            });
-        } else {
-            item = new JMenuItem("Set breakpoint here");
-            item.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    breakpointManager.addBreakpoint(breakPointResource, line);
-                    repaint();
-                }
-            });
-        }
-        
+
+        JMenuItem item = getBreakpointAction(hasBreakPointHere, line);
+
         JPopupMenu popup = new JPopupMenu();
         popup.add(item);
         popup.show(e.getComponent(), e.getX(), e.getY());
     }
-    
+
+    private JMenuItem getBreakpointAction(boolean hasBreakPointHere, int line) {
+        JMenuItem item;
+        if (hasBreakPointHere) {
+            item = new JMenuItem("Remove this breakpoint");
+            item.addActionListener(e -> {
+                breakpointManager.removeBreakpoint(breakPointResource, line);
+                repaint();
+            });
+        } else {
+            item = new JMenuItem("Set breakpoint here");
+            item.addActionListener(e -> {
+                breakpointManager.addBreakpoint(breakPointResource, line);
+                repaint();
+            });
+        }
+        return item;
+    }
+
     public void removeHighlights() {
         Highlighter highlighter = getHighlighter();
         for (Object hl : lineHighlights) {
@@ -201,6 +202,7 @@ public class BreakpointPane extends BracketMatchingTextArea implements Observer 
     
     private class BulletBorder extends AbstractBorder {
         
+        @Serial
         private static final long serialVersionUID = 487188734129249672L;
         
         public void paintBorder(Component c, Graphics g, int x, int y, int width,

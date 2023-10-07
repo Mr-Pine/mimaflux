@@ -20,6 +20,7 @@ import edu.kit.kastel.formal.mimaflux.capacitor.AddressRange;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class MimaFluxArgs {
     private static final String INDENT = "      ";
 

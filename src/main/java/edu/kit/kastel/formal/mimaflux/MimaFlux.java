@@ -44,14 +44,14 @@ public class MimaFlux {
                 version = new String(in.readAllBytes(), StandardCharsets.UTF_8);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            exit(ex);
         }
         VERSION = version;
     }
 
     public static MimaFluxArgs mmargs;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
             Timeline timeline = null;
             mmargs = new MimaFluxArgs();
@@ -181,7 +181,7 @@ public class MimaFlux {
         }
     }
 
-    static Logger logger = new Logger() {
+    final static Logger logger = new Logger() {
         @Override
         public void log(String message, Level level) {
             switch (level) {
@@ -190,12 +190,8 @@ public class MimaFlux {
                         System.out.println(message);
                     }
                 }
-                case INFO -> {
-                    System.out.println(message);
-                }
-                case ERROR -> {
-                    System.err.println(message);
-                }
+                case INFO -> System.out.println(message);
+                case ERROR -> System.err.println(message);
             }
         }
     };

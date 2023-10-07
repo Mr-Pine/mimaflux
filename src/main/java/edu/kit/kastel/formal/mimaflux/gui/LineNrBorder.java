@@ -26,18 +26,10 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.io.Serial;
 
 /**
  * A simple border that can be used to add linenumbers to text areas.
@@ -63,6 +55,7 @@ public class LineNrBorder extends EmptyBorder {
     /**
      * The Constant serialVersionUID.
      */
+    @Serial
     private static final long serialVersionUID = 1461567609517301384L;
 
     /**
@@ -116,9 +109,7 @@ public class LineNrBorder extends EmptyBorder {
         JFrame f = new JFrame();
         JTextArea ta = new JTextArea();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 2000; i++) {
-            sb.append("\n");
-        }
+        sb.append("\n".repeat(2000));
         ta.setText(sb.toString());
         ta.setBorder(new LineNrBorder(Color.lightGray));
         f.add(new JScrollPane(ta));
@@ -157,22 +148,4 @@ public class LineNrBorder extends EmptyBorder {
 
     }
 
-    /**
-     * Gets the color of the border
-     * 
-     * @return the color
-     */
-    public Color getColor() {
-        return color;
-    }
-
-    /**
-     * Sets the color of the border.
-     * 
-     * @param color
-     *            the new color
-     */
-    public void setColor(Color color) {
-        this.color = color;
-    }
 }

@@ -15,5 +15,5 @@
 package edu.kit.kastel.formal.mimaflux.capacitor;
 
 public interface UpdateListener {
-    public void memoryChanged(int addr, int val);
+    void memoryChanged(int addr, int val);
 }

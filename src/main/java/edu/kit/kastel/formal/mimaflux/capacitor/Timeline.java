@@ -15,7 +15,6 @@
 package edu.kit.kastel.formal.mimaflux.capacitor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,7 +31,7 @@ public class Timeline {
     private final State state;
 
     private int currentPosition = 0;
-    private List<UpdateListener> listeners = new ArrayList<>();
+    private final List<UpdateListener> listeners = new ArrayList<>();
 
     public Timeline(Update[][] updates, String fileContent, Map<String, Integer> labelMap,
                     List<Command> commands, Map<Integer, Integer> initialValues, Logger logger) {
@@ -104,10 +103,6 @@ public class Timeline {
 
     public String getFileContent() {
         return fileContent;
-    }
-
-    public List<Command> getCommands() {
-        return Collections.unmodifiableList(commands);
     }
 
     public int get(int adr) {

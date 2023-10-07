@@ -63,8 +63,8 @@ public final class BreakpointManager extends Observable {
      * The key to the map is the resource and the values is a set of set
      * breakpoint locations.
      */
-    private Map<Object, Set<Integer>> breakpointCollection =
-            new HashMap<Object, Set<Integer>>();
+    private final Map<Object, Set<Integer>> breakpointCollection =
+            new HashMap<>();
 
     /**
      * Adds a breakpoint to the collection. All listeners are notified if the
@@ -76,11 +76,7 @@ public final class BreakpointManager extends Observable {
      *            the line number / statment number / location to break at.
      */
     public void addBreakpoint( Object breakPointResource, int line) {
-        Set<Integer> list = breakpointCollection.get(breakPointResource);
-        if(list == null) {
-            list = new TreeSet<Integer>();
-            breakpointCollection.put(breakPointResource, list);
-        }
+        Set<Integer> list = breakpointCollection.computeIfAbsent(breakPointResource, k -> new TreeSet<>());
 
         Integer lineObject = line;
         boolean isNew = list.contains(lineObject);
@@ -105,7 +101,7 @@ public final class BreakpointManager extends Observable {
     public void removeBreakpoint( Object breakPointResource, int line) {
         Set<Integer> list = breakpointCollection.get(breakPointResource);
         if(list != null) {
-            boolean hasBeenPresent = list.remove(Integer.valueOf(line));
+            boolean hasBeenPresent = list.remove(line);
             if(hasBeenPresent) {
                 setChanged();
                 notifyObservers(breakPointResource);

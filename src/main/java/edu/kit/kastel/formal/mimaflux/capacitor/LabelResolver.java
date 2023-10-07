@@ -25,7 +25,7 @@ public class LabelResolver {
     private Map<String, Integer> labelMap;
 
     public void resolve(List<Command> commands) {
-        labelMap = new HashMap<String, Integer>();
+        labelMap = new HashMap<>();
         ListIterator<Command> it = commands.listIterator();
         while (it.hasNext()) {
             Command command = it.next();

@@ -19,9 +19,9 @@ import java.util.List;
 public class MimaVerification {
     private String verifyFilename;
     private String fileName;
-    private Logger logger;
-    private int maxSteps;
-    private List<AddressRange> printRanges;
+    private final Logger logger;
+    private final int maxSteps;
+    private final List<AddressRange> printRanges;
 
     public MimaVerification(Logger logger, int maxSteps, List<AddressRange> printRanges) {
         this.logger = logger;
@@ -140,8 +140,7 @@ public class MimaVerification {
                         charPositionInLine + ": " + msg);
             }
         });
-        FileContext content = parser.file();
-        return content;
+        return parser.file();
     }
 
 }

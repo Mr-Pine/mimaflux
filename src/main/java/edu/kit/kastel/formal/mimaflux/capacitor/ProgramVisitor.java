@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ProgramVisitor extends MimaAsmBaseVisitor<Void> {
 
-    List<Command> commands = new ArrayList<>();
+    final List<Command> commands = new ArrayList<>();
 
     private int curAddress = 0;
 
@@ -40,7 +40,7 @@ public class ProgramVisitor extends MimaAsmBaseVisitor<Void> {
     @Override
     public Void visitLabel_spec(Label_specContext ctx) {
         try {
-            Integer number = Integer.decode(ctx.NUMBER().getText());
+            int number = Integer.decode(ctx.NUMBER().getText());
             if (!Constants.isValue(number)) {
                 throw new TokenedException(ctx.NUMBER().getSymbol(), ctx.NUMBER().getText() + " is out of range for a 24-bit value.");
             }

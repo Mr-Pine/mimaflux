@@ -22,7 +22,7 @@ public class TimelineBuilder {
 
     private final List<Update[]> updates = new ArrayList<>();
 
-    private List<Update> curUpdates = new ArrayList<>();
+    private final List<Update> curUpdates = new ArrayList<>();
 
     private final String fileContent;
     private final Map<String, Integer> labelMap;

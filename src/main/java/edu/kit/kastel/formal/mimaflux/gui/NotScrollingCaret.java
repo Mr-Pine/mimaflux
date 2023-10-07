@@ -26,9 +26,9 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import java.awt.Rectangle;
-
 import javax.swing.text.DefaultCaret;
+import java.awt.*;
+import java.io.Serial;
 
 /**
  * The Class NotScrollingCaret is a simple wrapper around an arbitrary caret
@@ -37,6 +37,7 @@ import javax.swing.text.DefaultCaret;
  */
 public class NotScrollingCaret extends DefaultCaret {
 
+    @Serial
     private static final long serialVersionUID = 3397724566759902358L;
 
     /**

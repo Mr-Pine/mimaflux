@@ -24,7 +24,7 @@ public class State {
     public static final int IAR = -1;
     public static final int ACCU = -2;
 
-    private static Map<String, Integer> OPCODES = Map. ofEntries(
+    private static final Map<String, Integer> OPCODES = Map. ofEntries(
             Map.entry("LDC", 0x000000),
             Map.entry("DS",  0x0),
             Map.entry("LDV", 0x100000),
@@ -45,7 +45,7 @@ public class State {
             Map.entry("RAR", 0xf20000)
     );
 
-    private static Map<Integer, String> INV_OPCODES = Map. ofEntries(
+    private static final Map<Integer, String> INV_OPCODES = Map. ofEntries(
             Map.entry(0x000000, "LDC"),
             Map.entry(0x100000, "LDV"),
             Map.entry(0x200000, "STV"),
@@ -65,11 +65,11 @@ public class State {
             Map.entry(0xf20000, "RAR")
     );
 
-    private int[] mem = new int[Constants.ADDRESS_RANGE];
+    private final int[] mem = new int[Constants.ADDRESS_RANGE];
 
     private int iar;
     private int accu;
-    private Logger logger;
+    private final Logger logger;
 
     public State(List<Command> commands, Map<Integer, Integer> initialValues, Logger logger) {
         populateMemoryFromProgram(commands);
@@ -118,11 +118,11 @@ public class State {
     }
 
     public int get(int addr) {
-        switch (addr) {
-            case IAR: return iar;
-            case ACCU: return accu;
-            default: return mem[addr];
-        }
+        return switch (addr) {
+            case IAR -> iar;
+            case ACCU -> accu;
+            default -> mem[addr];
+        };
     }
 
     public String stringRepresentation(Map<String, Integer> labelMap, List<AddressRange> printRanges) {

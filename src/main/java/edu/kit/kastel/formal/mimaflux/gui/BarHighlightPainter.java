@@ -26,21 +26,16 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Shape;
-
 import javax.swing.plaf.TextUI;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.Highlighter.HighlightPainter;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 
 
 public class BarHighlightPainter implements HighlightPainter {
     
-    private Color color;
+    private final Color color;
     
     public BarHighlightPainter(Color color) {
         super();

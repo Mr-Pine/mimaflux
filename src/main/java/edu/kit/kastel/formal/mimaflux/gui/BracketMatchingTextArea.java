@@ -36,31 +36,22 @@
 
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.TextUI;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.Highlighter.HighlightPainter;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.Serial;
 
 /**
  * The Class BracketMatchingTextArea provides a GUI TextArea component which
@@ -84,6 +75,7 @@ public class BracketMatchingTextArea extends JTextArea implements CaretListener 
     /**
      * The Constant serialVersionUID needed for serialisation reasons
      */
+    @Serial
     private static final long serialVersionUID = 1649172317561172229L;
     
     /**
@@ -118,76 +110,6 @@ public class BracketMatchingTextArea extends JTextArea implements CaretListener 
      */
     public BracketMatchingTextArea() {
         super();
-        init();
-    }
-
-    /**
-     * Constructs a new JTextArea with the specified number of rows
-     * and columns, and the given model.  All of the constructors
-     * feed through this constructor.
-     *
-     * @param doc the model to use, or create a default one if null
-     * @param text the text to be displayed, null if none
-     * @param rows the number of rows >= 0
-     * @param columns the number of columns >= 0
-     * @exception IllegalArgumentException if the rows or columns
-     *  arguments are negative.
-     */
-    public BracketMatchingTextArea(Document doc, String text, int rows,
-            int columns) {
-        super(doc, text, rows, columns);
-        init();
-    }
-
-    /**
-     * Constructs a new JTextArea with the given document model, and defaults
-     * for all of the other arguments (null, 0, 0).
-     *
-     * @param doc  the model to use
-     */
-    public BracketMatchingTextArea(Document doc) {
-        super(doc);
-        init();
-    }
-
-    /**
-     * Constructs a new empty TextArea with the specified number of
-     * rows and columns.  A default model is created, and the initial
-     * string is null.
-     *
-     * @param rows the number of rows >= 0
-     * @param columns the number of columns >= 0
-     * @exception IllegalArgumentException if the rows or columns
-     *  arguments are negative.
-     */
-    public BracketMatchingTextArea(int rows, int columns) {
-        super(rows, columns);
-        init();
-    }
-
-    /**
-     * Constructs a new TextArea with the specified text and number
-     * of rows and columns.  A default model is created.
-     *
-     * @param text the text to be displayed, or null
-     * @param rows the number of rows >= 0
-     * @param columns the number of columns >= 0
-     * @exception IllegalArgumentException if the rows or columns
-     *  arguments are negative.
-     */
-    public BracketMatchingTextArea(String text, int rows, int columns) {
-        super(text, rows, columns);
-        init();
-    }
-
-    /**
-     * Constructs a new TextArea with the specified text displayed.
-     * A default model is created and rows/columns are set to 0.
-     *
-     * @param text the text to be displayed, or null
-     */
-    public BracketMatchingTextArea(String text) {
-        super(text);
         init();
     }
 
@@ -315,23 +237,6 @@ public class BracketMatchingTextArea extends JTextArea implements CaretListener 
         return -1;
     }
     
-    /* 
-     * for testing
-     */
-    public static void main(String[] args) {
-        JFrame f = new JFrame("Test bracket matching text area");
-        BracketMatchingTextArea uut = new BracketMatchingTextArea("nothing", 10, 10);
-        uut.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.err.println(e);
-            }
-        });
-        f.getContentPane().add(uut);
-        f.setSize(200, 200);
-        f.setVisible(true);
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
-    
     /**
      * The Class BorderPainter is a simple highlight painter that just draws a rectangle around the selection.
      * 
@@ -368,15 +273,7 @@ public class BracketMatchingTextArea extends JTextArea implements CaretListener 
             }
         }
     }
-    
-    public void addActionListener(ActionListener actionListener) {
-        listenerList.add(ActionListener.class, actionListener);
-    }
-    
-    public void removeActionListener(ActionListener actionListener) {
-        listenerList.remove(ActionListener.class, actionListener);
-    }
-    
+
     /**
      * Notifies all listeners that have registered interest for
      * notification on this event type.  The event instance 
@@ -391,10 +288,10 @@ public class BracketMatchingTextArea extends JTextArea implements CaretListener 
         Object[] listeners = listenerList.getListenerList();
         int modifiers = 0;
         AWTEvent currentEvent = EventQueue.getCurrentEvent();
-        if (currentEvent instanceof InputEvent) {
-            modifiers = ((InputEvent)currentEvent).getModifiers();
-        } else if (currentEvent instanceof ActionEvent) {
-            modifiers = ((ActionEvent)currentEvent).getModifiers();
+        if (currentEvent instanceof InputEvent inputEvent) {
+            modifiers = inputEvent.getModifiersEx();
+        } else if (currentEvent instanceof ActionEvent actionEvent) {
+            modifiers = actionEvent.getModifiers();
         }
         ActionEvent e =
             new ActionEvent(this, ActionEvent.ACTION_PERFORMED,

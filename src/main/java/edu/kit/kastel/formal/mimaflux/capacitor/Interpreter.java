@@ -36,7 +36,7 @@ public class Interpreter {
     private Map<String, Integer> labelMap;
     private List<Command> commands;
 
-    private Map<Integer, Integer> initialValues = new HashMap<>();
+    private final Map<Integer, Integer> initialValues = new HashMap<>();
 
     public void parseFile(String fileName) throws IOException {
         String fileContent = Files.readString(Paths.get(fileName));
@@ -77,7 +77,6 @@ public class Interpreter {
         logger.debug(" ---- initial state");
         logger.debug(state.stringRepresentation(labelMap, printRanges));
 
-        int count = 0;
         loop:
         while (builder.size() < maxSteps) {
             int ir = state.get(state.get(State.IAR));
@@ -169,7 +168,7 @@ public class Interpreter {
             builder.commit();
 
             logger.debug(" ---- After step " + builder.size());
-            logger.debug(state.stringRepresentation(labelMap));
+            logger.debug(state.stringRepresentation(labelMap, printRanges));
         }
 
         logger.debug(" ---- Finished interpretation");

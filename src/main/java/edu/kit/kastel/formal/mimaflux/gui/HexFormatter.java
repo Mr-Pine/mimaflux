@@ -40,7 +40,7 @@ class HexFormatter extends DefaultFormatter {
     }
 
     @Override
-    public String valueToString(Object value) throws ParseException {
+    public String valueToString(Object value) {
         return String.format("%02X", value);
     }
 }

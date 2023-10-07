@@ -53,7 +53,7 @@ public class GUI extends JFrame implements UpdateListener {
             new FileNameExtensionFilter("Mima ASM Files (.mima)", "mima");
 
 
-    private BreakpointManager breakpointManager = new BreakpointManager();
+    private final BreakpointManager breakpointManager = new BreakpointManager();
 
     private BreakpointPane code;
     private Timeline timeline;
@@ -65,12 +65,12 @@ public class GUI extends JFrame implements UpdateListener {
     private JTextField iarField;
     private JLabel nextInstruction;
     private String lastFilename;
-    private List<JComponent> componentsToDisable = new ArrayList<>();
+    private final List<JComponent> componentsToDisable = new ArrayList<>();
     private JPanel optionalPanel;
     private boolean modifiedSinceLoad;
-    private Logger logger;
-    private int maxSteps;
-    private List<AddressRange> printRanges;
+    private final Logger logger;
+    private final int maxSteps;
+    private final List<AddressRange> printRanges;
 
     public GUI(Timeline timeline, String filename, Logger logger, int maxSteps, List<AddressRange> printRanges) {
         super("Mima Flux Capacitor -- Time Travel Debugger");
@@ -258,7 +258,7 @@ public class GUI extends JFrame implements UpdateListener {
         gbc.gridy ++;
         {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            this.repreMode = new JComboBox(RepreState.values());
+            this.repreMode = new JComboBox<>(RepreState.values());
             repreMode.addActionListener(e -> refillTable());
             p.add(repreMode);
 
