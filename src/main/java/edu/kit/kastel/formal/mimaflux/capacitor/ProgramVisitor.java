@@ -12,12 +12,12 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
-import edu.kit.kastel.formal.mimaflux.MimaAsmParser.Adr_specContext;
-import edu.kit.kastel.formal.mimaflux.MimaAsmParser.CommandContext;
-import edu.kit.kastel.formal.mimaflux.MimaAsmParser.Label_specContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmParser.Adr_specContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmParser.CommandContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmParser.Label_specContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmBaseVisitor;
 
 import java.util.ArrayList;
 import java.util.List;

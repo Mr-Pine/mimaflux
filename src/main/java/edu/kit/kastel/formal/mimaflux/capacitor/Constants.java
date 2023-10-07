@@ -12,7 +12,7 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
 import java.awt.*;
 

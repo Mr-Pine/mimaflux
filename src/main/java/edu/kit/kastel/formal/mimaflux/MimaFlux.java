@@ -16,6 +16,12 @@ package edu.kit.kastel.formal.mimaflux;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import edu.kit.kastel.formal.mimaflux.capacitor.Interpreter;
+import edu.kit.kastel.formal.mimaflux.capacitor.Logger;
+import edu.kit.kastel.formal.mimaflux.capacitor.MimaException;
+import edu.kit.kastel.formal.mimaflux.capacitor.MimaVerification;
+import edu.kit.kastel.formal.mimaflux.capacitor.State;
+import edu.kit.kastel.formal.mimaflux.capacitor.Timeline;
 import edu.kit.kastel.formal.mimaflux.gui.GUI;
 
 import java.io.IOException;
@@ -28,14 +34,16 @@ import java.util.List;
 public class MimaFlux {
 
     public static final String VERSION;
+
     static {
         URL u = MimaFlux.class.getResource("/VERSION");
         String version = "<unknown>";
         try {
+            assert u != null;
             try (InputStream in = u.openStream()) {
                 version = new String(in.readAllBytes(), StandardCharsets.UTF_8);
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         VERSION = version;
@@ -52,7 +60,7 @@ public class MimaFlux {
                     .build();
             jc.parse(args);
 
-            System.out.println("Mima Flux Capacitor " + VERSION);
+            logger.info("Mima Flux Capacitor " + VERSION);
 
             if (mmargs.help) {
                 jc.usage();
@@ -61,45 +69,46 @@ public class MimaFlux {
 
             if (mmargs.verifyFile != null) {
                 if (mmargs.fileName == null) {
-                    exit("A filename must be provided in -verify mode.");
+                    throw new MimaException("A filename must be provided in -verify mode.");
                 }
-                MimaVerification mv = new MimaVerification();
-                int res = mv.verify(mmargs.verifyFile, mmargs.fileName);
+                MimaVerification verification = new MimaVerification(logger, mmargs.maxSteps, mmargs.printRanges);
+                int res = verification.verify(mmargs.verifyFile, mmargs.fileName);
                 System.exit(res);
             }
 
             if (mmargs.fileName == null) {
                 if (mmargs.autoRun) {
-                    exit("A filename must be provided in -run mode.");
+                    throw new MimaException("A filename must be provided in -run mode.");
                 }
             } else {
                 Interpreter interpreter = new Interpreter();
                 interpreter.parseFile(mmargs.fileName);
                 loadTestCaseInitialValues(mmargs.loadTest, interpreter);
                 setInitialValues(mmargs.assignments, interpreter);
-                timeline = interpreter.makeTimeline();
+                timeline = interpreter.makeTimeline(logger, mmargs.maxSteps, mmargs.printRanges);
             }
 
             if (mmargs.autoRun) {
+                assert timeline != null;
                 timeline.setPosition(timeline.countStates() - 1);
-                timeline.exposeState().printToConsole(timeline.getLabelMap());
+                timeline.exposeState().stringRepresentation(timeline.getLabelMap(), mmargs.printRanges);
                 ensureTests(timeline);
                 System.exit(0);
             } else {
-                GUI gui = new GUI(timeline);
+                GUI gui = new GUI(timeline, mmargs.fileName, logger, mmargs.maxSteps, mmargs.printRanges);
                 gui.setVisible(true);
             }
         } catch (NoSuchFileException ex) {
             exit(new IOException("File not found: " + ex.getMessage(), ex));
         } catch (ParameterException parameterException) {
-            System.err.println(parameterException.getMessage());
+            logger.error(parameterException.getMessage());
             parameterException.usage();
         } catch (Exception ex) {
             exit(ex);
         }
     }
 
-    private static void loadTestCaseInitialValues(String loadTest, Interpreter interpreter) throws IOException {
+    private static void loadTestCaseInitialValues(String loadTest, Interpreter interpreter) throws IOException, MimaException {
         if (loadTest == null) {
             return;
         }
@@ -107,7 +116,7 @@ public class MimaFlux {
         int hash = loadTest.lastIndexOf('#');
         String file = loadTest.substring(0, hash);
         String testcase = loadTest.substring(hash + 1);
-        MimaVerification mv = new MimaVerification();
+        MimaVerification mv = new MimaVerification(logger, mmargs.maxSteps, mmargs.printRanges);
         mv.setInitialValues(file, testcase, interpreter);
     }
 
@@ -118,7 +127,7 @@ public class MimaFlux {
 
         for (String test : mmargs.tests) {
             try {
-                System.err.println("Checking " + test);
+                logger.error("Checking " + test);
                 String[] parts = test.trim().split(" *= *");
                 if (parts.length != 2) {
                     throw new IllegalArgumentException();
@@ -130,15 +139,15 @@ public class MimaFlux {
                 Integer val = Integer.decode(parts[1]);
 
                 int observed = timeline.exposeState().get(resolved);
-                if(observed != val) {
-                    System.err.printf(" ... violated. Expected value %d (0x%x) at address %s, but observed %d (0x%x).",
-                            val, val, parts[0], observed, observed);
-                    exit("Test failed.");
+                if (observed != val) {
+                    logger.error(" ... violated. Expected value %d (0x%x) at address %s, but observed %d (0x%x).".formatted(
+                            val, val, parts[0], observed, observed));
+                    throw new MimaException("Test failed.");
                 } else {
-                    System.err.println(" ... checked.");
+                    logger.error(" ... checked.");
                 }
             } catch (Exception exception) {
-                logStacktrace(exception);
+                logger.logStacktrace(exception);
                 throw new IllegalArgumentException("Wrong test specification: " + test);
             }
         }
@@ -166,38 +175,34 @@ public class MimaFlux {
                 Integer val = Integer.decode(parts[1]);
                 interpreter.addPresetValue(resolved, val);
             } catch (Exception exception) {
-                logStacktrace(exception);
+                logger.logStacktrace(exception);
                 throw new IllegalArgumentException("Wrong set specification: " + assignment);
             }
         }
     }
 
-    public static void log(String msg) {
-        if (mmargs.verbose) {
-            System.err.println(msg);
+    static Logger logger = new Logger() {
+        @Override
+        public void log(String message, Level level) {
+            switch (level) {
+                case DEBUG -> {
+                    if (mmargs.verbose) {
+                        System.out.println(message);
+                    }
+                }
+                case INFO -> {
+                    System.out.println(message);
+                }
+                case ERROR -> {
+                    System.err.println(message);
+                }
+            }
         }
-    }
+    };
 
-    public static void exit(String msg) {
-        System.err.println(msg);
-        if (mmargs.verbose) {
-            new Throwable().printStackTrace();
-        }
+    static void exit(Exception exception) {
+        logger.error(exception.getMessage());
+        logger.logStacktrace(exception);
         System.exit(1);
-    }
-
-    public static void exit(Exception exception) {
-        if (mmargs.verbose) {
-            exception.printStackTrace();
-        } else {
-            System.err.println(exception.getMessage());
-        }
-        System.exit(1);
-    }
-
-    public static void logStacktrace(Exception exception) {
-        if (mmargs.verbose) {
-            exception.printStackTrace();
-        }
     }
 }

@@ -12,7 +12,9 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
-public record Update(int addr, int oldValue, int newValue) {
+@FunctionalInterface
+public interface BinaryIntFunction {
+    int apply(int operand1, int operand2);
 }

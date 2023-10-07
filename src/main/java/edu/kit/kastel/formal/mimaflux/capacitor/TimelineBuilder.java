@@ -12,12 +12,11 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class TimelineBuilder {
 
@@ -30,13 +29,15 @@ public class TimelineBuilder {
     private final List<Command> commands;
     private final Map<Integer, Integer> initialValues;
     private final State state;
+    private final Logger logger;
 
-    public TimelineBuilder(String fileContent, Map<String, Integer> labelMap, List<Command> commands, Map<Integer, Integer> initialValues) {
+    public TimelineBuilder(String fileContent, Map<String, Integer> labelMap, List<Command> commands, Map<Integer, Integer> initialValues, Logger logger) {
         this.fileContent = fileContent;
         this.labelMap = labelMap;
         this.commands = commands;
         this.initialValues = initialValues;
-        this.state = new State(commands, initialValues);
+        this.state = new State(commands, initialValues, logger);
+        this.logger = logger;
         int start = labelMap.getOrDefault(Constants.START_LABEL, 0);
         state.set(State.IAR, start);
     }
@@ -66,6 +67,6 @@ public class TimelineBuilder {
 
     public Timeline build() {
         Update[][] array = updates.toArray(Update[][]::new);
-        return new Timeline(array, fileContent, labelMap, commands, initialValues);
+        return new Timeline(array, fileContent, labelMap, commands, initialValues, logger);
     }
 }

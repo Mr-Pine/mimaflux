@@ -12,8 +12,34 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+grammar TestSpec;
 
-public interface UpdateListener {
-    public void memoryChanged(int addr, int val);
+@header {
+package edu.kit.kastel.formal.mimaflux.capacitor.generated;
 }
+
+file :
+  test* EOF
+  ;
+
+test :
+  name=ID() ':'
+  labels+=labelSpec*
+  pre+=spec* '==>' post+=spec+
+  ;
+
+spec :
+  addr=(ID | NUMBER) '=' val=NUMBER
+  ;
+
+labelSpec :
+  label=ID '->' val=NUMBER
+  ;
+
+NUMBER : ( '0' [xX][a-fA-F0-9]+ | ( '-' )? [0-9]+ );
+ID : [A-Za-z_][A-Za-z_0-9]*;
+
+WS : [ \t\r\n]+ -> skip;
+COMMENT : ';' .*? '\n' -> skip;
+
+UNKNOWN_CHARACTER : . ;

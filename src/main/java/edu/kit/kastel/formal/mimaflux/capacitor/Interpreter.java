@@ -12,9 +12,11 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
-import edu.kit.kastel.formal.mimaflux.MimaAsmParser.FileContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmParser.FileContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmParser;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmLexer;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -28,7 +30,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class Interpreter {
     private String fileContent;
@@ -68,34 +69,54 @@ public class Interpreter {
 
     }
 
-    public Timeline makeTimeline() {
+    public Timeline makeTimeline(Logger logger, int maxSteps, List<AddressRange> printRanges) {
 
-        TimelineBuilder builder = new TimelineBuilder(fileContent, labelMap, commands, initialValues);
+        TimelineBuilder builder = new TimelineBuilder(fileContent, labelMap, commands, initialValues, logger);
         State state = builder.exposeState();
 
-        if (MimaFlux.mmargs.verbose) {
-            System.out.println(" ---- initial state");
-            state.printToConsole(labelMap);
-        }
+        logger.debug(" ---- initial state");
+        logger.debug(state.stringRepresentation(labelMap, printRanges));
 
         int count = 0;
-        loop: while(builder.size() < MimaFlux.mmargs.maxSteps) {
+        loop:
+        while (builder.size() < maxSteps) {
             int ir = state.get(state.get(State.IAR));
             int arg = ir & Constants.ADDRESS_MASK;
             int opcode = ir >> 20;
             int tmp;
-            switch(opcode) {
-                case 0x0: builder.set(State.ACCU, ir); builder.incIAR(); break;
-                case 0x1: builder.set(State.ACCU, state.get(arg)); builder.incIAR(); break;
-                case 0x2: builder.set(arg, state.get(State.ACCU)); builder.incIAR(); break;
-                case 0x3: op(builder, arg, Integer::sum); break;
-                case 0x4: op(builder, arg, (x,y) -> x&y); break;
-                case 0x5: op(builder, arg, (x,y) -> x|y); break;
-                case 0x6: op(builder, arg, (x,y) -> x^y); break;
-                case 0x7: op(builder, arg, (x,y) -> x==y?-1:0); break;
-                case 0x8: builder.set(State.IAR, arg); break;
+            switch (opcode) {
+                case 0x0:
+                    builder.set(State.ACCU, ir);
+                    builder.incIAR();
+                    break;
+                case 0x1:
+                    builder.set(State.ACCU, state.get(arg));
+                    builder.incIAR();
+                    break;
+                case 0x2:
+                    builder.set(arg, state.get(State.ACCU));
+                    builder.incIAR();
+                    break;
+                case 0x3:
+                    op(builder, arg, Integer::sum);
+                    break;
+                case 0x4:
+                    op(builder, arg, (x, y) -> x & y);
+                    break;
+                case 0x5:
+                    op(builder, arg, (x, y) -> x | y);
+                    break;
+                case 0x6:
+                    op(builder, arg, (x, y) -> x ^ y);
+                    break;
+                case 0x7:
+                    op(builder, arg, (x, y) -> x == y ? -1 : 0);
+                    break;
+                case 0x8:
+                    builder.set(State.IAR, arg);
+                    break;
                 case 0x9:
-                    if((state.get(State.ACCU) & Constants.SIGNBIT) != 0)  {
+                    if ((state.get(State.ACCU) & Constants.SIGNBIT) != 0) {
                         builder.set(State.IAR, arg);
                     } else {
                         builder.incIAR();
@@ -121,30 +142,37 @@ public class Interpreter {
                     builder.set(State.IAR, state.get(arg) & Constants.ADDRESS_MASK);
                     break;
 
-                case 0xf: switch(arg) {
-                    case 0x00000: builder.commit(); break loop;
-                    case 0x10000:
-                        builder.set(State.ACCU, (~state.get(State.ACCU)) & Constants.VALUE_MASK);
-                        builder.incIAR();
-                        break;
-                    case 0x20000:
-                        tmp = state.get(State.ACCU);
-                        tmp = (tmp >> 1) | ((tmp & 1) << (Constants.VALUE_WIDTH - 1));
-                        builder.set(State.ACCU, tmp);
-                        builder.incIAR();
-                        break;
-                    default: builder.commit(); break loop;
-                }
-                break;
-                default: builder.commit(); break loop;
+                case 0xf:
+                    switch (arg) {
+                        case 0x00000:
+                            builder.commit();
+                            break loop;
+                        case 0x10000:
+                            builder.set(State.ACCU, (~state.get(State.ACCU)) & Constants.VALUE_MASK);
+                            builder.incIAR();
+                            break;
+                        case 0x20000:
+                            tmp = state.get(State.ACCU);
+                            tmp = (tmp >> 1) | ((tmp & 1) << (Constants.VALUE_WIDTH - 1));
+                            builder.set(State.ACCU, tmp);
+                            builder.incIAR();
+                            break;
+                        default:
+                            builder.commit();
+                            break loop;
+                    }
+                    break;
+                default:
+                    builder.commit();
+                    break loop;
             }
             builder.commit();
-            if (MimaFlux.mmargs.verbose) {
-                System.out.println(" ---- After step " + builder.size());
-                state.printToConsole(labelMap);
-            }
+
+            logger.debug(" ---- After step " + builder.size());
+            logger.debug(state.stringRepresentation(labelMap));
         }
-        MimaFlux.log(" ---- Finished interpretation");
+
+        logger.debug(" ---- Finished interpretation");
 
         return builder.build();
     }
@@ -157,6 +185,7 @@ public class Interpreter {
         builder.set(State.ACCU, res);
         builder.incIAR();
     }
+
     public Map<String, Integer> getLabelMap() {
         return labelMap;
     }

@@ -12,7 +12,7 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,12 +35,12 @@ public class Timeline {
     private List<UpdateListener> listeners = new ArrayList<>();
 
     public Timeline(Update[][] updates, String fileContent, Map<String, Integer> labelMap,
-                    List<Command> commands, Map<Integer, Integer> initialValues) {
+                    List<Command> commands, Map<Integer, Integer> initialValues, Logger logger) {
         this.updates = updates;
         this.fileContent = fileContent;
         this.labelMap = labelMap;
         this.commands = commands;
-        this.state = new State(commands, initialValues);
+        this.state = new State(commands, initialValues, logger);
         int start = labelMap.getOrDefault(Constants.START_LABEL, 0);
         state.set(State.IAR, start);
     }

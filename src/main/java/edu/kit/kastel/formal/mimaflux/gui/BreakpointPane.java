@@ -26,8 +26,17 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import edu.kit.kastel.formal.mimaflux.MimaFlux;
+import edu.kit.kastel.formal.mimaflux.capacitor.Logger;
 
+import javax.swing.*;
+import javax.swing.border.AbstractBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
+import javax.swing.text.Highlighter;
+import javax.swing.text.Highlighter.HighlightPainter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,18 +47,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.swing.Icon;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.border.AbstractBorder;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
-import javax.swing.text.Highlighter;
-import javax.swing.text.Highlighter.HighlightPainter;
 
 /**
  * BreakpointPane is a specialised TextArea which allows to:
@@ -74,14 +71,16 @@ public class BreakpointPane extends BracketMatchingTextArea implements Observer 
     private BreakpointManager breakpointManager;
     private Object breakPointResource;
     private List<Object> lineHighlights = new ArrayList<Object>();
+    private Logger logger;
     
     public BreakpointPane(BreakpointManager breakpointManager,
-            boolean showLineNumbers) {
+            boolean showLineNumbers, Logger logger) {
         super();
         this.breakpointManager = breakpointManager;
         init(showLineNumbers);
         Caret newCaret = new NotScrollingCaret();
         setCaret(newCaret);
+        this.logger = logger;
     }
 
     private void init(boolean showLineNumbers) {
@@ -194,9 +193,9 @@ public class BreakpointPane extends BracketMatchingTextArea implements Observer 
             repaint();
         } catch (BadLocationException e) {
             // throw new Error(e);
-            MimaFlux.log("Illegal line number " + line
+            logger.debug("Illegal line number " + line
                     + " referenced for " + getBreakPointResource());
-            MimaFlux.logStacktrace(e);
+            logger.logStacktrace(e);
         }
     }
     

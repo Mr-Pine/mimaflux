@@ -14,7 +14,7 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import edu.kit.kastel.formal.mimaflux.UpdateListener;
+import edu.kit.kastel.formal.mimaflux.capacitor.UpdateListener;
 
 import javax.swing.*;
 

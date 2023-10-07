@@ -16,28 +16,26 @@ package edu.kit.kastel.formal.mimaflux;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
+import edu.kit.kastel.formal.mimaflux.capacitor.AddressRange;
 
 import java.util.List;
 
 public class MimaFluxArgs {
     private static final String INDENT = "      ";
 
-    record Range(int from, int to) {
-    }
-
     @Parameter(names = { "-help", "-h" }, help = true, description = "Show this usage text")
     public boolean help;
 
-    static class RangeConverter implements IStringConverter<Range> {
+    static class RangeConverter implements IStringConverter<AddressRange> {
         @Override
-        public Range convert(String value) {
+        public AddressRange convert(String value) {
             String[] parts = value.trim().split(" *- *", 2);
             int from = Integer.decode(parts[0]);
             if (parts.length == 1) {
-                return new Range(from, from);
+                return new AddressRange(from, from);
             } else {
                 int to = Integer.decode(parts[1]);
-                return new Range(from, to);
+                return new AddressRange(from, to);
             }
         }
     }
@@ -59,7 +57,7 @@ public class MimaFluxArgs {
                     "Can be specified multiple times for multiple ranges. [only in -run mode]",
             converter = RangeConverter.class
     )
-    public List<Range> printRanges;
+    public List<AddressRange> printRanges;
 
     @Parameter(names = {"-set", "-s"},
             description = "Arg: <addr>=<val>.\n" + INDENT +

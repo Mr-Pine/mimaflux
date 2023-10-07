@@ -1,9 +1,11 @@
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
-import edu.kit.kastel.formal.mimaflux.TestSpecParser.FileContext;
-import edu.kit.kastel.formal.mimaflux.TestSpecParser.LabelSpecContext;
-import edu.kit.kastel.formal.mimaflux.TestSpecParser.SpecContext;
-import edu.kit.kastel.formal.mimaflux.TestSpecParser.TestContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.TestSpecLexer;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.TestSpecParser;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.TestSpecParser.FileContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.TestSpecParser.LabelSpecContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.TestSpecParser.SpecContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.TestSpecParser.TestContext;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -17,6 +19,15 @@ import java.util.List;
 public class MimaVerification {
     private String verifyFilename;
     private String fileName;
+    private Logger logger;
+    private int maxSteps;
+    private List<AddressRange> printRanges;
+
+    public MimaVerification(Logger logger, int maxSteps, List<AddressRange> printRanges) {
+        this.logger = logger;
+        this.maxSteps = maxSteps;
+        this.printRanges = printRanges;
+    }
 
     public int verify(String verifyFilename, String fileName) throws IOException {
         this.verifyFilename = verifyFilename;
@@ -31,7 +42,7 @@ public class MimaVerification {
         return result;
     }
 
-    public void setInitialValues(String verifyFilename, String testcase, Interpreter interpreter) throws IOException {
+    public void setInitialValues(String verifyFilename, String testcase, Interpreter interpreter) throws IOException, MimaException {
         interpreter.getLabelMap().put("_accu", State.ACCU);
         interpreter.getLabelMap().put("_iar", State.IAR);
         FileContext file = parse(verifyFilename);
@@ -41,7 +52,7 @@ public class MimaVerification {
                 return;
             }
         }
-        MimaFlux.exit(String.format("Testcase %s not found in %s.", testcase, verifyFilename));
+        throw new MimaException(String.format("Testcase %s not found in %s.", testcase, verifyFilename));
     }
 
     private int verifyTest(TestContext testContext) {
@@ -54,12 +65,12 @@ public class MimaVerification {
             interpreter.getLabelMap().put("_accu", State.ACCU);
             interpreter.getLabelMap().put("_iar", State.IAR);
             setInitialValues(testContext.labels, testContext.pre, interpreter);
-            Timeline timeline = interpreter.makeTimeline();
+            Timeline timeline = interpreter.makeTimeline(logger, maxSteps, printRanges);
             timeline.setPosition(timeline.countStates() - 1);
             return checkPostConditions(testContext, interpreter, timeline);
         } catch (Exception exception) {
             log(" ... Exception (try -verbose)");
-            MimaFlux.logStacktrace(exception);
+            logger.logStacktrace(exception);
             return 1;
         }
     }

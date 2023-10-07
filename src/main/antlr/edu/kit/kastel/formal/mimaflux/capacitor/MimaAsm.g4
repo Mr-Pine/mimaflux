@@ -15,7 +15,7 @@
 grammar MimaAsm;
 
 @header {
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor.generated;
 }
 
 file :

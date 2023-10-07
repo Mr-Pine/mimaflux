@@ -12,9 +12,9 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
-import edu.kit.kastel.formal.mimaflux.MimaAsmParser.CommandContext;
+import edu.kit.kastel.formal.mimaflux.capacitor.generated.MimaAsmParser.CommandContext;
 import org.antlr.v4.runtime.Token;
 
 public record Command(int address, String label, String instruction,

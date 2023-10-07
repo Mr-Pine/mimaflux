@@ -12,9 +12,7 @@
  *
  * Adapted for Mima by Mattias Ulbrich
  */
-package edu.kit.kastel.formal.mimaflux;
-
-import edu.kit.kastel.formal.mimaflux.MimaFluxArgs.Range;
+package edu.kit.kastel.formal.mimaflux.capacitor;
 
 import java.util.List;
 import java.util.Map;
@@ -71,16 +69,18 @@ public class State {
 
     private int iar;
     private int accu;
+    private Logger logger;
 
-    public State(List<Command> commands, Map<Integer, Integer> initialValues) {
+    public State(List<Command> commands, Map<Integer, Integer> initialValues, Logger logger) {
         populateMemoryFromProgram(commands);
         populateFromInitialValues(initialValues);
+        this.logger = logger;
     }
 
     private void populateFromInitialValues(Map<Integer, Integer> initialValues) {
         for (Entry<Integer, Integer> entry : initialValues.entrySet()) {
             set(entry.getKey(), entry.getValue());
-            MimaFlux.log("Update to initial state: " + entry);
+            logger.debug("Update to initial state: " + entry);
         }
     }
 
@@ -125,9 +125,10 @@ public class State {
         }
     }
 
-    public void printToConsole(Map<String, Integer> labelMap) {
-        System.out.printf("        IAR  = 0x%06x = %8d\t\t(instruction there: %s)%n", iar, iar, toInstruction(mem[iar]));
-        System.out.printf("        ACCU = 0x%06x = %8d%n", accu, accu);
+    public String stringRepresentation(Map<String, Integer> labelMap, List<AddressRange> printRanges) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("        IAR  = 0x%06x = %8d\t\t(instruction there: %s)%n".formatted(iar, iar, toInstruction(mem[iar])));
+        builder.append("        ACCU = 0x%06x = %8d%n".formatted(accu, accu));
         Optional<Integer> maxLen = labelMap.keySet().stream().map(String::length).max(Integer::compare);
         for (Entry<String, Integer> entry : labelMap.entrySet()) {
             if(entry.getKey().startsWith("_")) {
@@ -135,16 +136,17 @@ public class State {
                 continue;
             }
             int val = entry.getValue();
-            System.out.printf("Label '%" + maxLen.get() +
-                    "s' at mem[0x%05x]  =  0x%06x = %8d = %s%n", entry.getKey(), val, mem[val], mem[val], toInstruction(mem[val]));
+            builder.append(("Label '%" + maxLen.get() +
+                    "s' at mem[0x%05x]  =  0x%06x = %8d = %s%n").formatted(entry.getKey(), val, mem[val], mem[val], toInstruction(mem[val])));
         }
-        if (MimaFlux.mmargs.printRanges != null) {
-            for (Range range : MimaFlux.mmargs.printRanges) {
+        if (printRanges != null) {
+            for (AddressRange range : printRanges) {
                 for (int i = range.from(); i <= range.to(); i++) {
-                    System.out.printf("mem[0x%05x] = 0x%06x = %8d = %s%n", i, mem[i], mem[i], toInstruction(mem[i]));
+                    builder.append("mem[0x%05x] = 0x%06x = %8d = %s%n".formatted(i, mem[i], mem[i], toInstruction(mem[i])));
                 }
             }
         }
+        return builder.toString();
     }
 
     public static String toInstruction(int instruction) {

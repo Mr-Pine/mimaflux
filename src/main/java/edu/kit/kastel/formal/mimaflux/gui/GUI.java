@@ -14,12 +14,13 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
-import edu.kit.kastel.formal.mimaflux.Command;
-import edu.kit.kastel.formal.mimaflux.Interpreter;
-import edu.kit.kastel.formal.mimaflux.MimaFlux;
-import edu.kit.kastel.formal.mimaflux.State;
-import edu.kit.kastel.formal.mimaflux.Timeline;
-import edu.kit.kastel.formal.mimaflux.UpdateListener;
+import edu.kit.kastel.formal.mimaflux.capacitor.AddressRange;
+import edu.kit.kastel.formal.mimaflux.capacitor.Command;
+import edu.kit.kastel.formal.mimaflux.capacitor.Interpreter;
+import edu.kit.kastel.formal.mimaflux.capacitor.Logger;
+import edu.kit.kastel.formal.mimaflux.capacitor.State;
+import edu.kit.kastel.formal.mimaflux.capacitor.Timeline;
+import edu.kit.kastel.formal.mimaflux.capacitor.UpdateListener;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.codicons.Codicons;
@@ -67,10 +68,16 @@ public class GUI extends JFrame implements UpdateListener {
     private List<JComponent> componentsToDisable = new ArrayList<>();
     private JPanel optionalPanel;
     private boolean modifiedSinceLoad;
+    private Logger logger;
+    private int maxSteps;
+    private List<AddressRange> printRanges;
 
-    public GUI(Timeline timeline) {
+    public GUI(Timeline timeline, String filename, Logger logger, int maxSteps, List<AddressRange> printRanges) {
         super("Mima Flux Capacitor -- Time Travel Debugger");
-        this.lastFilename = MimaFlux.mmargs.fileName;
+        this.logger = logger;
+        this.maxSteps = maxSteps;
+        this.lastFilename = filename;
+        this.printRanges = printRanges;
         initGui();
         setTimeline(timeline);
         modifiedSinceLoad = false;
@@ -147,7 +154,7 @@ public class GUI extends JFrame implements UpdateListener {
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 
-        this.code = new BreakpointPane(breakpointManager, true);
+        this.code = new BreakpointPane(breakpointManager, true, logger);
         this.code.setEditable(true);
         this.code.getDocument().addDocumentListener((UniDocListener) x -> {
             setTimeline(null);
@@ -341,7 +348,7 @@ public class GUI extends JFrame implements UpdateListener {
             JOptionPane.showMessageDialog(this,
                     ex.getMessage(),
                     "Error while saving file.", JOptionPane.ERROR_MESSAGE);
-            MimaFlux.logStacktrace(ex);
+            logger.logStacktrace(ex);
         }
     }
 
@@ -390,7 +397,7 @@ public class GUI extends JFrame implements UpdateListener {
             JOptionPane.showMessageDialog(this,
                     ex.getMessage(),
                     "Error while loading file.", JOptionPane.ERROR_MESSAGE);
-            MimaFlux.logStacktrace(ex);
+            logger.logStacktrace(ex);
         }
         loadString(content);
         modifiedSinceLoad = false;
@@ -400,10 +407,10 @@ public class GUI extends JFrame implements UpdateListener {
         try {
             Interpreter interpreter = new Interpreter();
             interpreter.parseString(content);
-            timeline = interpreter.makeTimeline();
+            timeline = interpreter.makeTimeline(logger, maxSteps, printRanges);
             setTimeline(timeline);
 
-            if (timeline.countStates() == MimaFlux.mmargs.maxSteps) {
+            if (timeline.countStates() == maxSteps) {
                 JOptionPane.showMessageDialog(this,
                         new Object[] {
                                 "This timeline reaches the maximum number of steps.",
@@ -415,12 +422,12 @@ public class GUI extends JFrame implements UpdateListener {
             JOptionPane.showMessageDialog(this,
                     parseCancel.getCause().getMessage(),
                     "Error while executing mima file.", JOptionPane.ERROR_MESSAGE);
-            MimaFlux.logStacktrace(parseCancel);
+            logger.logStacktrace(parseCancel);
         } catch(Exception ex) {
             JOptionPane.showMessageDialog(this,
                     ex.getMessage(),
                     "Error while executing mima file.", JOptionPane.ERROR_MESSAGE);
-            MimaFlux.logStacktrace(ex);
+            logger.logStacktrace(ex);
         }
 
     }
