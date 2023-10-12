@@ -91,7 +91,7 @@ public class MimaFlux {
             if (mmargs.autoRun) {
                 assert timeline != null;
                 timeline.setPosition(timeline.countStates() - 1);
-                timeline.exposeState().stringRepresentation(timeline.getLabelMap(), mmargs.printRanges);
+                logger.debug(timeline.exposeState().stringRepresentation(timeline.getLabelMap(), mmargs.printRanges));
                 ensureTests(timeline);
                 System.exit(0);
             } else {
@@ -156,8 +156,8 @@ public class MimaFlux {
     private static void setInitialValues(List<String> assignments, Interpreter interpreter) {
 
         // Make _accu and _iar available.
-        interpreter.getLabelMap().put("_accu", State.ACCU);
-        interpreter.getLabelMap().put("_iar", State.IAR);
+        interpreter.addLabelValue("_accu", State.ACCU);
+        interpreter.addLabelValue("_iar", State.IAR);
 
         if (assignments == null) {
             return;

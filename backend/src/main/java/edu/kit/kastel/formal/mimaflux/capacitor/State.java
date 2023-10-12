@@ -72,9 +72,9 @@ public class State {
     private final Logger logger;
 
     public State(List<Command> commands, Map<Integer, Integer> initialValues, Logger logger) {
+        this.logger = logger;
         populateMemoryFromProgram(commands);
         populateFromInitialValues(initialValues);
-        this.logger = logger;
     }
 
     private void populateFromInitialValues(Map<Integer, Integer> initialValues) {
