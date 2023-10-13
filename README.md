@@ -167,27 +167,27 @@ memory location *a* point is read or written.
 The indirection can be thought of as a two step process:
 *<< a >> &xrarr; Acc* is first *< a > &xrarr; Acc*, then *< Acc > &xrarr; Acc*
 
-OpCode 	| mnemonik	| Description
-:------:|:--------------|:-----------
-0	| LDC c		| c &xrarr; Acc
-1	| LDV a		| < a > &xrarr; Acc
-2	| STV a		| Acc &xrarr; < a >
-3	| ADD a		| Acc + < a > &xrarr; Acc
-4	| AND a		| Acc AND < a > &xrarr; Acc
-5	| OR a		| Acc OR < a > &xrarr; Acc
-6	| XOR a		| Acc XOR < a > &xrarr; Acc
-7	| EQL a		| if(Acc == < a >) { -1 &xrarr; Acc } else { 0 &xrarr; Acc }
-8	| JMP a		| Jump to address a
-9	| JMN a		| Jump to address a if Acc < 0
-A	| LDIV a	| << a >> &xrarr; Acc
-B	| STIV a	| Acc &xrarr; << a >>
-C	| JMS a		| jump subroutine
-D	| JIND a	| jump indirect
-E	|		| free
-F0	| HALT		| stops the minimal machine
-F1	| NOT		| one's complement(Acc) &xrarr; Acc
-F2	| RAR		| rotates Acc on the the right &xrarr; Acc
-F3 - FF	|		| free
+| OpCode 	 | mnemonik	 | Description                                                |
+|:--------:|:----------|:-----------------------------------------------------------|
+|    0	    | LDC c		   | c &xrarr; Acc                                              |
+|    1	    | LDV a		   | < a > &xrarr; Acc                                          |
+|    2	    | STV a		   | Acc &xrarr; < a >                                          |
+|    3	    | ADD a		   | Acc + < a > &xrarr; Acc                                    |
+|    4	    | AND a		   | Acc AND < a > &xrarr; Acc                                  |
+|    5	    | OR a		    | Acc OR < a > &xrarr; Acc                                   |
+|    6	    | XOR a		   | Acc XOR < a > &xrarr; Acc                                  |
+|    7	    | EQL a		   | if(Acc == < a >) { -1 &xrarr; Acc } else { 0 &xrarr; Acc } |
+|    8	    | JMP a		   | Jump to address a                                          |
+|    9	    | JMN a		   | Jump to address a if Acc < 0                               |
+|    A	    | LDIV a	   | << a >> &xrarr; Acc                                        |
+|    B	    | STIV a	   | Acc &xrarr; << a >>                                        |
+|    C	    | JMS a		   | jump subroutine                                            |
+|    D	    | JIND a	   | jump indirect                                              |
+|    E	    | 		        | free                                                       |
+|   F0	    | HALT		    | stops the minimal machine                                  |
+|   F1	    | NOT		     | one's complement(Acc) &xrarr; Acc                          |
+|   F2	    | RAR		     | rotates Acc on the the right &xrarr; Acc                   |
+| F3 - FF	 | 		        | free                                                       |
 
 ## Other simulators
 
