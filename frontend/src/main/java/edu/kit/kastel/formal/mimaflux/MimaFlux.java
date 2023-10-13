@@ -53,7 +53,7 @@ public class MimaFlux {
 
     public static void main(String[] args) {
         try {
-            Timeline timeline = null;
+            Timeline timeline;
             mmargs = new MimaFluxArgs();
             JCommander jc = JCommander.newBuilder()
                     .addObject(mmargs)
@@ -77,6 +77,7 @@ public class MimaFlux {
             }
 
             if (mmargs.fileName == null) {
+                timeline = null;
                 if (mmargs.autoRun) {
                     throw new MimaException("A filename must be provided in -run mode.");
                 }
@@ -91,7 +92,7 @@ public class MimaFlux {
             if (mmargs.autoRun) {
                 assert timeline != null;
                 timeline.setPosition(timeline.countStates() - 1);
-                logger.debug(timeline.exposeState().stringRepresentation(timeline.getLabelMap(), mmargs.printRanges));
+                logger.debug(() -> timeline.exposeState().stringRepresentation(timeline.getLabelMap(), mmargs.printRanges));
                 ensureTests(timeline);
                 System.exit(0);
             } else {
@@ -183,15 +184,15 @@ public class MimaFlux {
 
     final static Logger logger = new Logger() {
         @Override
-        public void log(String message, Level level) {
+        public void log(LogProducer logProducer, Level level) {
             switch (level) {
                 case DEBUG -> {
                     if (mmargs.verbose) {
-                        System.out.println(message);
+                        System.out.println(logProducer.generateLog());
                     }
                 }
-                case INFO -> System.out.println(message);
-                case ERROR -> System.err.println(message);
+                case INFO -> System.out.println(logProducer.generateLog());
+                case ERROR -> System.err.println(logProducer.generateLog());
             }
         }
     };

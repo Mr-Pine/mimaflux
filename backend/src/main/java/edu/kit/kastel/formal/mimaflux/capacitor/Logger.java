@@ -7,24 +7,44 @@ public abstract class Logger {
     public enum Level {
         DEBUG, INFO, ERROR, DEBUG_ERROR
     }
-    public abstract void log(String message, Level level);
+
+    public abstract void log(LogProducer message, Level level);
+
+    public void info(LogProducer logProducer) {
+        log(logProducer, Level.INFO);
+    }
 
     public void info(String message) {
-        log(message, Level.INFO);
+        info(() -> message);
+    }
+
+    public void debug(LogProducer logProducer) {
+        log(logProducer, Level.DEBUG);
     }
 
     public void debug(String message) {
-        log(message, Level.DEBUG);
+        debug(() -> message);
+    }
+
+    public void error(LogProducer logProducer) {
+        log(logProducer, Level.ERROR);
     }
 
     public void error(String message) {
-        log(message, Level.ERROR);
+        error(() -> message);
     }
 
     public void logStacktrace(Exception exception) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        exception.printStackTrace(pw);
-        log(sw.toString(), Level.DEBUG_ERROR);
+        log(() -> {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            exception.printStackTrace(pw);
+            return sw.toString();
+        }, Level.DEBUG_ERROR);
+    }
+
+    @FunctionalInterface
+    public interface LogProducer {
+        String generateLog();
     }
 }

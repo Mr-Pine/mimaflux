@@ -75,7 +75,7 @@ public class Interpreter {
         State state = builder.exposeState();
 
         logger.debug(" ---- initial state");
-        logger.debug(state.stringRepresentation(labelMap, printRanges));
+        logger.debug(() -> state.stringRepresentation(labelMap, printRanges));
 
         loop:
         while (builder.size() < maxSteps) {
@@ -168,7 +168,7 @@ public class Interpreter {
             builder.commit();
 
             logger.debug(" ---- After step " + builder.size());
-            logger.debug(state.stringRepresentation(labelMap, printRanges));
+            logger.debug(() -> state.stringRepresentation(labelMap, printRanges));
         }
 
         logger.debug(" ---- Finished interpretation");
