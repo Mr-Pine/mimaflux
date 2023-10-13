@@ -8,8 +8,6 @@ plugins {
     id("org.ajoberstar.grgit") version "5.2.0"
 }
 
-group = "edu.kit.kastel.formal"
-version = "1.2.0"
 val grgit: Grgit = Grgit.open(mapOf("currentDir" to project.rootDir))
 
 val versionFile by tasks.registering {

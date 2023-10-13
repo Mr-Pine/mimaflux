@@ -4,9 +4,6 @@ plugins {
     id("maven-publish")
 }
 
-group = "edu.kit.kastel.formal"
-version = "1.2.0"
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
