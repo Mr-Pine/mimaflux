@@ -1,15 +1,22 @@
 plugins {
-    id("java")
+    id("java-library")
     id("antlr")
+    id("maven-publish")
 }
 
 group = "edu.kit.kastel.formal"
-version = "1.1.0"
+version = "1.2.0"
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.named("sourcesJar") {
+    dependsOn(tasks.generateGrammarSource)
 }
 
 repositories {
@@ -25,6 +32,15 @@ dependencies {
 
     // Customise antlr4 version, for buildscript
     antlr("org.antlr:antlr4:4.13.1")
+}
+
+publishing {
+    publications {
+        val mimafluxCapacitor by creating(MavenPublication::class.java) {
+            from(components["java"])
+            artifactId = "mimaflux-capacitor"
+        }
+    }
 }
 
 tasks.generateGrammarSource {
