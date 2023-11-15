@@ -60,6 +60,9 @@ dependencies {
     implementation("com.beust:jcommander:1.82")
     implementation("org.kordamp.ikonli:ikonli-swing:12.3.1")
     implementation("org.kordamp.ikonli:ikonli-codicons-pack:12.3.1")
+    implementation("com.formdev:flatlaf:2.6")
+    implementation("com.formdev:flatlaf-extras:2.6")
+    implementation("com.formdev:svgSalamander:1.1.4")
 
     implementation(project(":backend"))
 }

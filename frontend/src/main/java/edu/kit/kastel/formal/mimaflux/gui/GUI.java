@@ -14,6 +14,11 @@
  */
 package edu.kit.kastel.formal.mimaflux.gui;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.util.SystemInfo;
+
 import edu.kit.kastel.formal.mimaflux.capacitor.AddressRange;
 import edu.kit.kastel.formal.mimaflux.capacitor.Command;
 import edu.kit.kastel.formal.mimaflux.capacitor.Interpreter;
@@ -151,6 +156,15 @@ public class GUI extends JFrame implements UpdateListener {
     }
 
     private void initGui() {
+        if (SystemInfo.isMacFullWindowContentSupported) {
+            this.getRootPane().putClientProperty("apple.awt.fullWindowContent", true);
+            this.getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
+            this.getRootPane().putClientProperty("apple.awt.windowTitleVisible", false);
+        }
+
+        FlatLaf.registerCustomDefaultsSource("themes");
+        FlatDarkLaf.setup();
+
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 
@@ -286,14 +300,24 @@ public class GUI extends JFrame implements UpdateListener {
     private Container makeButtonPanel() {
         JToolBar buttonPanel = new JToolBar();
         buttonPanel.setFloatable(false);
-        buttonPanel.add(button("Menu", null, Codicons.MENU, this::showMenu, false));
-        buttonPanel.addSeparator(new Dimension(50,0));
-        buttonPanel.add(button("Go to initial state", null, Codicons.DEBUG_RESTART, this::gotoStart, false));
-        buttonPanel.add(button("Continue backwards until breakpoint",  KeyStroke.getKeyStroke("F5"), Codicons.DEBUG_REVERSE_CONTINUE, e -> continueToBreakpoint(-1), true));
-        buttonPanel.add(button("Step backwards",  KeyStroke.getKeyStroke("F6"), Codicons.DEBUG_STEP_BACK, e -> timeline.addToPosition(-1), true));
-        buttonPanel.add(button("Step forwards",  KeyStroke.getKeyStroke("F8"), Codicons.DEBUG_STEP_OVER, e -> timeline.addToPosition(1), true));
-        buttonPanel.add(button("Continue forwards until breakpoint",  KeyStroke.getKeyStroke("F9"), Codicons.DEBUG_CONTINUE, e-> continueToBreakpoint(+1), true));
-        buttonPanel.add(button("Go to terminal state",  null, Codicons.DEBUG_START, e-> timeline.setPosition(timeline.countStates() - 1), true));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        if (SystemInfo.isMacFullWindowContentSupported && SystemInfo.isMacOS)
+            buttonPanel.add(Box.createHorizontalStrut(70), 0);
+        if (SystemInfo.isMacFullWindowContentSupported && SystemInfo.isMacOS)
+            buttonPanel.add(Box.createHorizontalStrut(70), 0);
+        buttonPanel.add(button("Menu", null, "menu.svg", this::showMenu, false));
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(button("Go to initial state", null, "debug_restart.svg", this::gotoStart, false));
+        buttonPanel.add(button("Continue backwards until breakpoint", KeyStroke.getKeyStroke("F5"),
+                "debug_reverse_continue.svg", e -> continueToBreakpoint(-1), true));
+        buttonPanel.add(button("Step backwards", KeyStroke.getKeyStroke("F6"), "debug_step_back.svg",
+                e -> timeline.addToPosition(-1), true));
+        buttonPanel.add(button("Step forwards", KeyStroke.getKeyStroke("F8"), "debug_step_over.svg",
+                e -> timeline.addToPosition(1), true));
+        buttonPanel.add(button("Continue forwards until breakpoint", KeyStroke.getKeyStroke("F9"), "debug_continue.svg",
+                e -> continueToBreakpoint(+1), true));
+        buttonPanel.add(button("Go to terminal state", null, "debug_start.svg",
+                e -> timeline.setPosition(timeline.countStates() - 1), true));
 
         return buttonPanel;
     }
@@ -447,14 +471,14 @@ public class GUI extends JFrame implements UpdateListener {
         } while(pos > 0 && pos < timeline.countStates());
     }
 
-    private JButton button(String text, KeyStroke keyStroke, Ikon ikon, ActionListener listener, boolean needsProgram) {
-        JButton res = new JButton(FontIcon.of(ikon, 28));
-        res.setDisabledIcon(FontIcon.of(ikon, 28, Color.lightGray));
+    private JButton button(String text, KeyStroke keyStroke, String icon, ActionListener listener, boolean needsProgram) {
+        JButton res = new JButton( new FlatSVGIcon( "icons/" + icon ) );
+        // res.setDisabledIcon(FontIcon.of(ikon, 28, Color.lightGray));
         res.setToolTipText(text);
         res.addActionListener(listener);
-        res.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(5,10,5, 10),
-                res.getBorder()));
+        // res.setBorder(BorderFactory.createCompoundBorder(
+        // BorderFactory.createEmptyBorder(5,10,5, 10),
+        // res.getBorder()));
         res.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, text);
         res.getActionMap().put(text, new AbstractAction() {
             @Override
